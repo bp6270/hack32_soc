@@ -21,9 +21,9 @@ architecture sim of test_mux is
 begin
     dut: mux 
         port map(
-                d0 => td0, d1 => td1, 
-                sel => tsel, 
-                y => ty
+            d0 => td0, d1 => td1, 
+            sel => tsel, 
+            y => ty
         );
     
     process begin
