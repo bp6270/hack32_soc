@@ -23,7 +23,7 @@ begin
             q => tq            
         );
         
-    clk_proc : process
+    clk_proc: process
     begin
         tclk <= '0';
         wait for 10ns;
@@ -31,7 +31,7 @@ begin
         wait for 10ns;
     end process;
     
-    counter : process
+    counter: process
     begin
         treset <= '1';
         wait for 100ns;
