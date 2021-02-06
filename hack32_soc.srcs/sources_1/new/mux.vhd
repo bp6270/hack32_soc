@@ -20,4 +20,4 @@ begin
             y <= d1;
         end if;
     end process;
-end Behavioral;
+end behavioral;
