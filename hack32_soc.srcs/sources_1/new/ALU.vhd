@@ -60,7 +60,4 @@ begin
             ng <= '0';
         end if;
     end process;
-end behavioral;                    
-                           
-    
-                
+end behavioral;         

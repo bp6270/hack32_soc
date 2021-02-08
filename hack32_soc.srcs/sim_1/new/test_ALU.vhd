@@ -1,12 +1,11 @@
 library ieee;
-use ieee.std_logic_1164 .all;
+use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity test_ALU is
 end test_ALU;
 
 architecture sim of test_ALU is
-
     component ALU
         port (
             x, y: in std_logic_vector (15 downto 0);
