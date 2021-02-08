@@ -4,4 +4,7 @@ hack32_soc.ip_user_files
 hack32_soc.sim
 hack32_soc.xpr
 hack32_soc.runs/
+hack32_soc.board/
+vivado.log
+archive_project_summary.txt
 
