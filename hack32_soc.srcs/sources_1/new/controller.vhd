@@ -26,7 +26,7 @@ begin
         if (opcode = '0') then
             -- load A register with constant
             control := "100100000000";
-        else
+        else           
             -- these blocks figure out where ALU computation is stored
             
             -- don't store anywhere

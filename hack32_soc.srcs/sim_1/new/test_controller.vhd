@@ -34,7 +34,6 @@ begin
     process begin
         -- test 1: opcode is 0 (load a reg)
         topcode <= '0';
-        tc_inst_a <= '1';
         
         wait for 20 ns;
         assert ta_reg_mux_sel = '1' report "Test 1 a reg mux failed" severity ERROR;
@@ -45,6 +44,7 @@ begin
         
         -- test 2: opcode is 1 (computation), save nowhere, no jump
         topcode <= '1';
+        tc_inst_a <= '1';
         tc_inst_j <= "000";
         tc_inst_d <= "000";
         tc_inst_c <= "101010";
