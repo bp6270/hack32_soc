@@ -34,29 +34,29 @@ begin
     clk_proc: process
         begin
             tclock <= '0';
-            wait for 10ns;
+            wait for 5ns;
             tclock <= '1';
-            wait for 10ns;
+            wait for 5ns;
         end process;
     
     hack_cpu_test: process
     begin
         -- test A instruction
-        wait for 20 ns;
+        wait for 10 ns;
         tinst <= '0' & "000000000000001"; -- load 1
         tfrommem <= "1111000011110000";
         treset <= '0';
         
-        wait for 20ns;
+        wait for 10ns;
         tinst <= "111" & '0' & "110000" & "000" & "000"; -- output A as result
         
-        wait for 20ns;
+        wait for 10ns;
         tinst <= '0' & "000000000000010"; -- load 2
         
-        wait for 20ns;
+        wait for 10ns;
         tinst <= "111" & '0' & "110111" & "011" & "001"; -- add A+1 and save to A M D
         
-        wait for 20ns;
+        wait for 10ns;
         tinst <= "111" & '0' & "000010" & "001" & "000"; -- add D+A and save to M
     wait;
     end process;
