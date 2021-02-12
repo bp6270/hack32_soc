@@ -30,9 +30,9 @@ begin
     clk_proc: process -- sim 100MHz master clock
     begin
         tmclk <= '0';
-        wait for 10ns;
+        wait for 5ns;
         tmclk <= '1';
-        wait for 10ns;
+        wait for 5ns;
     end process;
     
     clk_divider: process
