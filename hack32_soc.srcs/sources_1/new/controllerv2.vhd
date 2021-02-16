@@ -156,6 +156,7 @@ begin
                     elsif isneg = '1' then
                         pcwe <= '1';
                     else
+                        pcinc <= '1';
                         pcwe <= '0';
                     end if;
                 elsif inst (2 downto 0) = "111" then

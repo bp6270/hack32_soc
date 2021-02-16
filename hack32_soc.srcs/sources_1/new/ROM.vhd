@@ -25,7 +25,7 @@ architecture behavioral of ROM is
     end function;
 
     
-    signal ROM: romtype := initrom("Max.hack");
+    signal ROM: romtype := initrom("Rect.hack");
 begin
     dout <= to_stdlogicvector(ROM(to_integer(unsigned(addr))));
 end behavioral;
