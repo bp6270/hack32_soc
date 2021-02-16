@@ -11,13 +11,13 @@ architecture sim of test_hack_CPU is
             inst: in std_logic_vector (15 downto 0);
             frommem: in std_logic_vector (15 downto 0);
             reset, clock: in std_logic;
-            tomem, aregout, dregout, aregmuxout, alumuxout: out std_logic_vector (15 downto 0);
+            tomem: out std_logic_vector (15 downto 0);
             memwr: out std_logic;
             memaddr, pcaddr: out std_logic_vector(14 downto 0)
     );
     end component;
     
-    signal tinst, tfrommem, ttomem, taregout, tdregout, taregmuxout, talumuxout: std_logic_vector(15 downto 0);
+    signal tinst, tfrommem, ttomem: std_logic_vector(15 downto 0);
     signal tmemaddr, tpcaddr: std_logic_vector(14 downto 0);
     signal treset, tclock, tmemwr: std_logic;
 begin
@@ -26,7 +26,7 @@ begin
             inst => tinst,
             frommem => tfrommem,
             reset => treset, clock => tclock,
-            tomem => ttomem, aregout => taregout, dregout => tdregout, aregmuxout => taregmuxout, alumuxout => talumuxout,
+            tomem => ttomem,
             memwr => tmemwr,
             memaddr => tmemaddr, pcaddr => tpcaddr
         );

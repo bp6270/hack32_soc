@@ -14,7 +14,7 @@ end RAM;
 
 architecture behavioral of RAM is
     
-    type mem_array is array ((2**15)-1 downto 0)
+    type mem_array is array (0 to (2**15)-1)
         of std_logic_vector(15 downto 0);
     signal mem: mem_array;
 

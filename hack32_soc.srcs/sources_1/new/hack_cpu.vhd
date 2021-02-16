@@ -6,20 +6,21 @@ entity hack_cpu is
         inst: in std_logic_vector (15 downto 0);
         frommem: in std_logic_vector (15 downto 0);
         reset, clock: in std_logic;
-        tomem, aregout, dregout, aregmuxout, alumuxout: out std_logic_vector (15 downto 0);
+        tomem: out std_logic_vector (15 downto 0);
         memwr: out std_logic;
         memaddr, pcaddr: out std_logic_vector(14 downto 0)
     );
 end hack_cpu;
 
 architecture structural of hack_cpu is
-    component controller
-        port ( 
-            opcode, c_inst_a, is_zero, is_neg: in std_logic;
-            c_inst_c: in std_logic_vector (5 downto 0);
-            c_inst_d, c_inst_j: in std_logic_vector (2 downto 0);
-            a_reg_mux_sel, alu_mux_sel, pc_we, a_reg_we, d_reg_we, ram_we: out std_logic;
-            alu_op: out std_logic_vector (5 downto 0)
+    component controllerv2
+        port(
+            inst: in STD_LOGIC_VECTOR(15 downto 0);
+            clk: in STD_LOGIC;
+            rst: in STD_LOGIC;
+            iszero, isneg: in STD_LOGIC;
+            irwe, aregmuxsel, alumuxsel, aregwe, dregwe, resregwe, ramwe, pcwe, pcinc: out STD_LOGIC;
+            alufunc: out STD_LOGIC_VECTOR(5 downto 0)
         );
     end component;
     
@@ -40,27 +41,41 @@ architecture structural of hack_cpu is
         );
     end component;
     
-    component ALU
+    component flagreg
         port (
-            x, y: in std_logic_vector (15 downto 0);
-            zx, nx, zy, ny, f, no: in std_logic;
-            res: out std_logic_vector (15 downto 0);
-            zr, ng: out std_logic
+            clk: in std_logic;
+            we: in std_logic;
+            din: in std_logic;
+            dout: out std_logic 
+        );
+    end component;
+    
+    component ALUv2
+        port (
+            alufunc: in STD_LOGIC_VECTOR(5 downto 0);
+            a: in STD_LOGIC_VECTOR(15 downto 0);
+            b: in STD_LOGIC_VECTOR(15 downto 0);
+            zf: out STD_LOGIC;
+            nf: out STD_LOGIC;
+            y: out STD_LOGIC_VECTOR(15 downto 0)    
         );
     end component;
     
     component PC
         port ( 
-            clk, rst, we: in std_logic;
+            clk, rst, we, inc: in std_logic;
             din: std_logic_vector(14 downto 0);
             q: out std_logic_vector(14 downto 0)
         );
     end component;
     
     -- controller signals
-    signal a_reg_mux_ctrl, alu_mux_sel_ctrl, pc_we_ctrl, a_reg_we_ctrl, d_reg_we_ctrl, ram_we_ctrl: std_logic;
+    signal irwectl, aregmuxselctl, alumuxselctl, aregwectl, dregwectl, resregwectl, ramwectl, pcwectl, pcincctl: std_logic;
     signal alu_op_ctrl: std_logic_vector (5 downto 0);
            
+    -- inst reg signals
+    signal iregdata: std_logic_vector(15 downto 0);
+    
     -- a reg signals
     signal aregdata: std_logic_vector(15 downto 0);
     
@@ -70,40 +85,68 @@ architecture structural of hack_cpu is
     -- d reg signals
     signal dregdata: std_logic_vector(15 downto 0);
     
+    -- res reg signals
+    signal resregdata: std_logic_vector(15 downto 0);
+    
+    -- zero flag reg signal
+    signal zflagregsig: std_logic;
+    
+    -- neg flag reg signal
+    signal nflagregsig: std_logic;
+    
     -- alu mux signals
     signal alumuxdata: std_logic_vector(15 downto 0);
     
     -- alu signals
-    signal res_zero, res_neg: std_logic;
+    signal aluzerores: std_logic;
+    signal alunegres: std_logic;
     signal alu_res: std_logic_vector(15 downto 0);
 begin
-    ctrlr: controller
+    ctrlr: controllerv2
         port map(
-            opcode => inst(15), c_inst_a => inst(12), is_zero => res_zero, is_neg => res_neg, 
-            c_inst_c => inst(11 downto 6), 
-            c_inst_d => inst(5 downto 3), c_inst_j => inst(2 downto 0),
-            a_reg_mux_sel => a_reg_mux_ctrl, alu_mux_sel => alu_mux_sel_ctrl, pc_we => pc_we_ctrl, a_reg_we => a_reg_we_ctrl, d_reg_we => d_reg_we_ctrl, ram_we => ram_we_ctrl,
-            alu_op => alu_op_ctrl
+            inst => iregdata,
+            clk => clock,
+            rst => reset,
+            iszero => zflagregsig,
+            isneg => nflagregsig,
+            irwe => irwectl,
+            aregmuxsel => aregmuxselctl,
+            alumuxsel => alumuxselctl,
+            aregwe => aregwectl,
+            dregwe => dregwectl,
+            resregwe => resregwectl,
+            ramwe => ramwectl,
+            pcwe => pcwectl,
+            pcinc => pcincctl,
+            alufunc => alu_op_ctrl
         );
         
     pctr: PC
         port map(
-            clk => clock, rst => reset, we => pc_we_ctrl,
+            clk => clock, rst => reset, we => pcwectl, inc => pcincctl,
             din => aregdata(14 downto 0),
             q => pcaddr
         );
         
+    ireg: reg
+        port map(
+            clk => clock,
+            we => irwectl,
+            din => inst,
+            dout => iregdata
+        );
+        
     areg_mux: mux
         port map(
-            d0 => alu_res, d1 => inst(15 downto 0),
-            sel => a_reg_mux_ctrl,
+            d0 => resregdata, d1 => iregdata,
+            sel => aregmuxselctl,
             y => aregmuxdata
         );
         
     areg: reg
         port map(
             clk => clock,
-            we => a_reg_we_ctrl,
+            we => aregwectl,
             din => aregmuxdata,
             dout => aregdata
         );
@@ -111,34 +154,54 @@ begin
     dreg: reg
         port map(
             clk => clock,
-            we => d_reg_we_ctrl,
-            din => alu_res,
+            we => dregwectl,
+            din => resregdata,
             dout => dregdata
         );
         
-    cpu_alu: ALU
+    cpu_alu: ALUv2
         port map(
-            x => dregdata, y=> alumuxdata,
-            zx => alu_op_ctrl(5) , nx => alu_op_ctrl(4), 
-            zy => alu_op_ctrl(3), ny=> alu_op_ctrl(2), 
-            f => alu_op_ctrl(1), no => alu_op_ctrl(0),
-            res => alu_res,
-            zr => res_zero, ng => res_neg
+            alufunc => alu_op_ctrl,
+            a => dregdata,
+            b => alumuxdata,
+            zf => aluzerores,
+            nf => alunegres,
+            y => alu_res
         );
         
     alu_mux: mux
         port map(
             d0 => aregdata, d1 => frommem,
-            sel => alu_mux_sel_ctrl,
+            sel => alumuxselctl,
             y => alumuxdata
         );
+        
+    res_reg: reg
+        port map(
+            clk => clock,
+            we => resregwectl,
+            din => alu_res,
+            dout => resregdata
+        );
+        
+    zero_reg: flagreg
+        port map(
+            clk => clock,
+            we => resregwectl,
+            din => aluzerores,
+            dout => zflagregsig
+        );
+        
+    neg_reg: flagreg
+        port map(
+            clk => clock,
+            we => resregwectl,
+            din => alunegres,
+            dout => nflagregsig
+        );
     
-    alumuxout <= alumuxdata;
-    aregmuxout <= aregmuxdata;
-    aregout <= aregdata;
-    dregout <= dregdata;
-    tomem <= alu_res;
-    memwr <= ram_we_ctrl;
+    tomem <= resregdata;
+    memwr <= ramwectl;
     memaddr <= aregdata(14 downto 0);
     
 end structural;

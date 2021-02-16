@@ -6,13 +6,13 @@ use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity clock_div is
     port(
-            mclk: in STD_LOGIC;
-            rst: in STD_LOGIC;
-            clk50M: out STD_LOGIC;
-            clk25M: out STD_LOGIC;
-            clk48k: out STD_LOGIC
-            
-        );
+        mclk: in STD_LOGIC;
+        rst: in STD_LOGIC;
+        clktop: out STD_LOGIC;
+        clk50M: out STD_LOGIC;
+        clk25M: out STD_LOGIC;
+        clk48k: out STD_LOGIC
+    );
 end clock_div;
 
 architecture behavioral of clock_div is
@@ -27,7 +27,7 @@ begin
             q <= q + 1;
         end if;
     end process;
-   
+    clktop <= mclk; -- top speed
     clk50M <= q(0); -- 50 MHz
     clk25M <= q(1); -- 25 MHz
     clk48k <= q(10); -- 48 kHz

@@ -8,6 +8,7 @@ end test_ALU;
 architecture sim of test_ALU is
     component ALU
         port (
+            opcode: in std_logic;
             x, y: in std_logic_vector (15 downto 0);
             zx, nx, zy, ny, f, no: in std_logic;
             res: out std_logic_vector (15 downto 0);
@@ -16,11 +17,12 @@ architecture sim of test_ALU is
     end component;
     
     signal tx, ty, tres: std_logic_vector(15 downto 0);
-    signal tzx, tnx, tzy, tny, tf, tno, tzr, tng: std_logic;
+    signal topcode, tzx, tnx, tzy, tny, tf, tno, tzr, tng: std_logic;
 
 begin
     dut: ALU
         port map(
+            opcode => topcode,
             x=> tx, y => ty,
             zx => tzx, nx => tnx, zy => tzy, ny => tny, f => tf, no => tno,
             res => tres,
@@ -28,6 +30,7 @@ begin
         );
     
     process begin
+        topcode <= '1';
         tx <= x"0001";
         ty <= x"0002";
              

@@ -10,18 +10,20 @@ architecture sim of test_clock_div is
         port (
             mclk: in STD_LOGIC;
             rst: in STD_LOGIC;
+            clktop: out STD_LOGIC;
             clk50M: out STD_LOGIC;
             clk25M: out STD_LOGIC;
             clk48k: out STD_LOGIC
         );
     end component;
     
-    signal tmclk, trst, tclk50M, tclk25M, tclk48k: STD_LOGIC;
+    signal tmclk, trst, tclktop, tclk50M, tclk25M, tclk48k: STD_LOGIC;
 begin
     dut: clock_div
         port map(
             mclk => tmclk,
             rst => trst,
+            clktop => tclktop,
             clk50M => tclk50M,
             clk25M => tclk25M,
             clk48k => tclk48k
